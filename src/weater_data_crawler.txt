@@ -1,0 +1,63 @@
+def weatherdatacrawler():
+	currentDate = datetime.date(2017,11,30)
+	currentTime = datetime.time(16,0,0)
+	currentDatetime = datetime.datetime.combine(currentDate, currentTime)
+	currentTemperature = 0
+	currentSnowfall = 0
+	currentHumidity = 0
+	currentRainfall = 0
+	currentWindspeed = 0
+
+	req = urllib.request.Request("http://www.kma.go.kr/weather/observation/currentweather.jsp")
+	data = urllib.request.urlopen(req).read() # data = urllib.requset.urlopen("http://www.daum.net").read()
+
+	soup = BeautifulSoup(data, 'html.parser')
+	trList = soup.find_all('tr')
+	for i in trList:
+		if "대전" in str(i):
+			tdList = i.find_all('td')
+
+			currentTemperature = tdList[5].getText()
+			currentRainfall = tdList[8].getText()
+			currentSnowfall = tdList[9].getText()
+			currentHumidity = tdList[10].getText()
+			currentWindspeed = tdList[12].getText()
+
+			if currentTemperature == chr(0xa0):
+				currentTemperature = 0
+			if currentRainfall == chr(0xa0):
+				currentRainfall = 0
+			if currentSnowfall == chr(0xa0):
+				currentSnowfall = 0
+			if currentHumidity == chr(0xa0):
+				currentHumidity = 0
+			if currentWindspeed == chr(0xa0):
+				currentWindspeed = 0
+
+			break
+
+	currentTemperature = float(currentTemperature)
+	currentRainfall = float(currentRainfall)
+	currentSnowfall = float(currentSnowfall)
+	currentHumidity = float(currentHumidity)
+	currentWindspeed = float(currentWindspeed)
+
+	season = ''
+
+	if currentDatetime.month >= 3 and currentDatetime.month < 6:
+		season = "1" # spring
+	if currentDatetime.month >= 6 and currentDatetime.month < 9:
+		season = "2" # summer
+	if currentDatetime.month >= 9 and currentDatetime.month < 12:
+		season = "3" # fall
+	if currentDatetime.month >= 12 or currentDatetime.month < 3:
+		season = "4" # winter
+
+	currentTestData = pd.DataFrame(datetime = currentDatetime, season = season, rentMonth = currentDatetime.month, rentHour = currentDatetime.hour, rentWeekday = currentDatetime.weekday(), temperature = currentTemperature, humidity = currentHumidity, windspeed = currentWindspeed, rainfall = currentRainfall, snowfall = currentSnowfall, rentCount = 0)
+
+	currentTestData.to_csv("test.csv")
+
+	#f = open("test.csv", "a", encoding = "utf-8", newline = '')
+	#writer = csv.writer(f)
+	#writer.writerow([currentDatetime, season, currentDatetime.month, currentDatetime.hour, currentDatetime.weekday(), currentTemperature, currentHumidity,currentWindspeed, currentRainfall, currentSnowfall, '0', 0])
+	#f.close()
