@@ -7,7 +7,7 @@ class DB_controller:
 		self.cursor = self.connect.cursor()
 
 	def createTable(self, tableName):
-		sql = "create table "+tableName+" (datetime varchar(20), month int, weekday int, season int, hour int, temperature int, humidity int, windspeed int, rainfall int)"
+		sql = "create table "+tableName+" (datetime varchar(20), month int, weekday int, season int, hour int, temperature float, humidity float, windspeed float, rainfall float)"
 		self.cursor.execute(sql)
 
 	def insertDataToTable(self, crnt_datetime, tableName, crnt_feature_data):
@@ -15,4 +15,14 @@ class DB_controller:
 		self.cursor.execute(sql)
 		self.connect.commit()
 
+	def isTableExist(self, tableName):
+		sql = "show tables;"
+
+		self.cursor.execute(sql)
+		table_list = self.cursor.fetchall()
 	
+		for table in table_list:
+			if tableName in table[0]:
+				return True
+
+		return False

@@ -82,7 +82,7 @@ def processOnDB(db_controller, current_tashu_status):
 	currentDateTime = datetime.datetime.now()
 	currentDateTime = datetime.datetime(currentDateTime.year, currentDateTime.month, currentDateTime.day, currentDateTime.hour)
 	# table Name
-	tableName = str(currentDateTime.year)+"%02d"%(currentDateTime.month)+"%02d"%(currentDateTime.day)+"_status"
+	tableName = str(currentDateTime.year)+"%02d"%(currentDateTime.month)+"%02d"%(currentDateTime.day)+"_tashu_status"
 
 	if db_controller.isTableExist(tableName):
 		# today's table already exist

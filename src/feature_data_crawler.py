@@ -4,9 +4,10 @@ import urllib.request
 from bs4 import BeautifulSoup
 from selenium import webdriver
 import time
-from datetime import datetime
+import datetime
 import json
 import os
+from feature_data_DB_controller import DB_controller
 
 def get_time_id(datetime):
 	day = datetime.day
@@ -27,10 +28,10 @@ def weatherDataCrawler(crnt_datetime):
 	for tr in trList:
 		if get_time_id(crnt_datetime) in str(tr):
 			tdList = tr.find_all('td')
-			crnt_feature_data['temperature'] = tdList[5].getText()
+			crnt_feature_data['temperature'] = float(tdList[5].getText())
 			crnt_feature_data['rainfall'] = tdList[8].getText()
-			crnt_feature_data['humidity'] = tdList[9].getText()
-			crnt_feature_data['windspeed'] = tdList[11].getText()
+			crnt_feature_data['humidity'] = float(tdList[9].getText())
+			crnt_feature_data['windspeed'] = float(tdList[11].getText())
 			break
 
 	for key, value in crnt_feature_data.items():
@@ -52,13 +53,25 @@ def weatherDataCrawler(crnt_datetime):
 
 	return crnt_feature_data
 
-def predictBikeUsage(crnt_featrue_data):
-	cmd = "Rscript "
+def processOnDB(db_controller, crnt_weather_data):
+	currentDateTime = datetime.datetime.now()
+	currentDateTime = datetime.datetime(currentDateTime.year, currentDateTime.month, currentDateTime.day, currentDateTime.hour)
+
+	tableName = str(currentDateTime.year)+"%02d"%(currentDateTime.month)+"%02d"%(currentDateTime.day)+"_weather_status"
+	if not db_controller.isTableExist(tableName):
+		db_controller.createTable(tableName)
+	db_controller.insertDataToTable(currentDateTime, tableName, crnt_weather_data)
 
 def main():
-	crnt_datetime = datetime.now()
+	crnt_datetime = datetime.datetime.now()
 	crnt_weather_data = weatherDataCrawler(crnt_datetime)
 	print(crnt_weather_data)
+	userId = "root"
+	userPwd = "1234"
+	dbName = "tashu_prediction"
+	db_controller = DB_controller(userId, userPwd, dbName)
+	processOnDB(db_controller, crnt_weather_data)
+
 
 if __name__ == "__main__":
 	main()
